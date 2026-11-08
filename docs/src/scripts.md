@@ -1,17 +1,17 @@
-# Experiments
+# Running the scripts
 
-The scripts in `tools/experiments/` run the model to answer a question. They need the local dataset, read it with `greb_data_dir(; allow_download=false)` and never download it. Run each from the repository root.
+The scripts in `scripts/` run the model to answer a question. They need the local dataset, read it with `greb_data_dir(; allow_download=false)` and never download it. Run each from the repository root.
 
 | Script | Answers | Typical run time |
 |:-------|:--------|:-----------------|
 | `sensitivity.jl` | What is the effective climate sensitivity of an abrupt-CO2 preset? | Minutes for 100 years |
 | `co2_sweep.jl` | How does the last-year climate change with the CO2 level? | Minutes for the default 5 levels of 30 years; hours for a full curve |
-| `helpers.jl` | The module `ExperimentTools` that both scripts use | Not run |
+| `src/helpers.jl` | The module `GREBExperiments` that both scripts use | Not run |
 
-## Climate sensitivity
+## The sensitivity script
 
 ```bash
-julia --project=. -t 2,0 tools/experiments/sensitivity.jl [preset] [scenario years] [spin-up years] [control years]
+julia --project=. -t 2,0 scripts/sensitivity.jl [preset] [scenario years] [spin-up years] [control years]
 ```
 
 The defaults are `co2_double`, 100 scenario years, a spin-up of 3 years and a control of 5 years, on the NCEP climatology. The script regresses the change in the top-of-atmosphere net flux (`sw - olr`) on the change in surface temperature over the annual global means (the Gregory method). The preset must give its scenario as an anomaly. A short run:
@@ -39,10 +39,10 @@ The 100-year default for `co2_double` gives 5.06 W/m2, -1.88 W/m2/K and 2.69 K, 
 ## CO2 sweep
 
 ```bash
-julia --project=. -t 4,0 tools/experiments/co2_sweep.jl [levels] [scenario years] [spin-up years] [control years]
+julia --project=. -t 4,0 scripts/co2_sweep.jl [levels] [scenario years] [spin-up years] [control years]
 ```
 
-The script holds CO2 at `levels` values (default 5), log-spaced between 170 ppm (`:co2_half`) and 3400 ppm (`:co2_10x`), after a control at 280 ppm. It needs at least 12 scenario years, since it takes a last-year mean. It prints the anomaly of the last scenario year and writes it to `tools/experiments/out/co2_sweep.csv` (git-ignored). A short run:
+The script holds CO2 at `levels` values (default 5), log-spaced between 170 ppm (`:co2_half`) and 3400 ppm (`:co2_10x`), after a control at 280 ppm. It needs at least 12 scenario years, since it takes a last-year mean. It prints the anomaly of the last scenario year and writes it to `scripts/out/co2_sweep.csv` (git-ignored). A short run:
 
 ```text
  CO2 [ppm]    Ts [K]       ice    precip
@@ -59,9 +59,9 @@ The script holds CO2 at `levels` values (default 5), log-spaced between 170 ppm 
 
 The levels run side by side, which is why it wants several threads. Each running level holds 370 MB of fields, so check the free memory before you raise `-t`.
 
-## ExperimentTools
+## GREBExperiments
 
-`helpers.jl` defines the module `ExperimentTools`. Its functions are pure: none runs the model, and every mean is area-weighted. Include it with `include("tools/experiments/helpers.jl"); using .ExperimentTools: summarize, gregory`.
+`src/helpers.jl` is the module `GREBExperiments`. Its functions are pure: none runs the model, and every mean is area-weighted. Load it with `using GREBExperiments: summarize, gregory`.
 
 | Function | Returns |
 |:---------|:--------|
@@ -75,4 +75,4 @@ The levels run side by side, which is why it wants several threads. Each running
 | `pattern_correlation(a, b)` | The area-weighted correlation of two maps |
 | `sine_fit(series, period)` | The amplitude, the lag in samples and the mean of a fitted sine |
 
-`test/test_experiment_tools.jl` tests the helpers; run it by name with `Pkg.test(test_args=["experiment_tools"])` after changing them.
+`test/test_helpers.jl` tests the helpers; run `julia --project=. -e 'using Pkg; Pkg.test()'` after changing them.

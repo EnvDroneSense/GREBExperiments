@@ -3,16 +3,9 @@
 # runs the model. Every mean is area-weighted. `summarize` reads the result's
 # `scnr_anomaly` to tell anomalies from absolute records.
 #
-#   include("helpers.jl"); using .ExperimentTools: summarize, gregory
-
-module ExperimentTools
-
-using GREBClimate
+#   using GREBExperiments: summarize, gregory
 
 const G = GREBClimate
-
-export annual_means, summarize, in_range_report, gregory, area_mean, zonal_mean, polar_amplification,
-       land_ocean, pattern_correlation, sine_fit
 
 const WEIGHT = [Float64(G.dxlat_grid[j]) for _ in 1:G.xdim, j in 1:G.ydim]
 
@@ -174,5 +167,3 @@ function gregory(dTs::AbstractVector{<:Real}, dnet::AbstractVector{<:Real})
     return (forcing=forcing, feedback=feedback, sensitivity=(-forcing / feedback), r2=r2,
         reached=x[end], remaining=y[end])
 end
-
-end # module

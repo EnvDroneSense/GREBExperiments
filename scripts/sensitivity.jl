@@ -1,6 +1,6 @@
 # Effective climate sensitivity of an abrupt-CO2 run, from its monthly records.
 #
-#   julia --project=. -t 2,0 tools/experiments/sensitivity.jl [preset] [scenario years] [spin-up years] [control years]
+#   julia --project=. -t 2,0 scripts/sensitivity.jl [preset] [scenario years] [spin-up years] [control years]
 #
 # Runs `preset` (default co2_double) for the scenario years (default 100) on the
 # NCEP climatology, after a spin-up (default 3 years) and a control (default 5),
@@ -14,10 +14,9 @@
 # -1.88 W/m2/K, 2.69 K, reached 3.00 K. Needs the local dataset and a preset
 # whose scenario output is an anomaly.
 
-include(joinpath(@__DIR__, "helpers.jl"))
 using GREBClimate
 using Printf
-using .ExperimentTools: summarize, gregory
+using GREBExperiments: summarize, gregory
 
 function main(args)
     name = Symbol(get(args, 1, "co2_double"))

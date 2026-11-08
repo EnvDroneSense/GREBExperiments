@@ -1,18 +1,17 @@
 # Climate response over a range of CO2 levels.
 #
-#   julia --project=. -t 4,0 tools/experiments/co2_sweep.jl [levels] [scenario years] [spin-up years] [control years]
+#   julia --project=. -t 4,0 scripts/co2_sweep.jl [levels] [scenario years] [spin-up years] [control years]
 #
 # Holds CO2 at each of `levels` values (default 5), log-spaced between 170 ppm
 # (:co2_half) and 3400 ppm (:co2_10x), for the scenario years (default 30) after
 # a spin-up (default 3) and a control at 280 ppm (default 5). Prints, and writes
-# to tools/experiments/out/co2_sweep.csv, the anomaly of the last scenario year:
+# to scripts/out/co2_sweep.csv, the anomaly of the last scenario year:
 # global-mean Ts, ice cover and precipitation. For a full curve use
 # `... 20 100`, which takes hours. Needs the local dataset and several threads;
 # each running level holds 370 MB of fields.
 
-include(joinpath(@__DIR__, "helpers.jl"))
 using GREBClimate
-using .ExperimentTools: annual_means
+using GREBExperiments: annual_means
 
 function main(args)
     levels = parse(Int, get(args, 1, "5"))

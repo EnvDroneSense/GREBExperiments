@@ -1,0 +1,9 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+GREBClimate = "128c3379-415a-4bc6-90bd-d536e37a6aec"
+GREBExperiments = "c8f78cf8-5241-40b0-9d11-43807b8dd1ab"
+
+[compat]
+Documenter = "1"
+GREBClimate = "~2.3"
+julia = "1.10"

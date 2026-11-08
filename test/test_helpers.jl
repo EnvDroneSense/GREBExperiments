@@ -1,9 +1,6 @@
-# The experiment helpers in tools/experiments/helpers.jl.
+# The helpers in src/helpers.jl.
 
-const ET = let tools = Module()
-    Base.include(tools, joinpath(@__DIR__, "..", "tools", "experiments", "helpers.jl"))
-    tools.ExperimentTools
-end
+const ET = GREBExperiments
 
 @testset "gregory recovers a straight line" begin
     dT = collect(0.5:0.25:3.0)

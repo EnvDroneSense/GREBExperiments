@@ -1,0 +1,19 @@
+name = "GREBExperiments"
+uuid = "c8f78cf8-5241-40b0-9d11-43807b8dd1ab"
+authors = ["Thomas Struys"]
+version = "0.1.0"
+
+[deps]
+GREBClimate = "128c3379-415a-4bc6-90bd-d536e37a6aec"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[compat]
+GREBClimate = "~2.3"
+julia = "1.10"
+
+[extras]
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Logging", "Test"]

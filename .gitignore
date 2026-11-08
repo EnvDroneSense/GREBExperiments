@@ -1,0 +1,23 @@
+# Julia environments: resolved versions stay local. The Manifest of this
+# repository points at a local GREB-julia checkout (Pkg.develop), so it must
+# not be committed.
+Manifest.toml
+
+# Results written by the experiment scripts
+out/
+/results/
+
+# Coverage output
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+
+# Claude Code: only local settings
+/.claude/settings.local.json
+CLAUDE.md
+
+# macOS
+.DS_Store
+
+# Built documentation
+/docs/build/
