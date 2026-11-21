@@ -4,8 +4,10 @@ authors = ["Thomas Struys"]
 version = "0.1.0"
 
 [deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 GREBClimate = "128c3379-415a-4bc6-90bd-d536e37a6aec"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [compat]
 GREBClimate = "~2.3"

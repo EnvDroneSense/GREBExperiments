@@ -42,7 +42,7 @@ The 100-year default for `co2_double` gives 5.06 W/m2, -1.88 W/m2/K and 2.69 K, 
 julia --project=. -t 4,0 scripts/co2_sweep.jl [levels] [scenario years] [spin-up years] [control years]
 ```
 
-The script holds CO2 at `levels` values (default 5), log-spaced between 170 ppm (`:co2_half`) and 3400 ppm (`:co2_10x`), after a control at 280 ppm. It needs at least 12 scenario years, since it takes a last-year mean. It prints the anomaly of the last scenario year and writes it to `scripts/out/co2_sweep.csv` (git-ignored). A short run:
+The script holds CO2 at `levels` values (default 5), log-spaced between 170 ppm (`:co2_half`) and 3400 ppm (`:co2_10x`), after a control at 280 ppm. It needs at least 12 scenario years, since it takes a last-year mean. It prints the anomaly of the last scenario year and writes it to `scripts/out/co2_sweep.csv` (git-ignored), with `co2_sweep_manifest.toml` beside it. The manifest holds the package versions, the run lengths, the columns and the configuration of each member. A short run:
 
 ```text
  CO2 [ppm]    Ts [K]       ice    precip
@@ -74,6 +74,7 @@ The levels run side by side, which is why it wants several threads. Each running
 | `land_ocean(map, z_topo)` | The area-weighted means over land and over ocean |
 | `pattern_correlation(a, b)` | The area-weighted correlation of two maps |
 | `sine_fit(series, period)` | The amplitude, the lag in samples and the mean of a fitted sine |
+| `run_members(reduce, run, configs; labels, outdir, name)` | Runs the members, returns one row each, and writes `<name>.csv` and `<name>_manifest.toml` |
 | `co2_file(path, years, values)` | Writes a `year ppm` file for `CO2File(path)`; returns the path |
 
 `test/test_helpers.jl` tests the helpers; run `julia --project=. -e 'using Pkg; Pkg.test()'` after changing them.
