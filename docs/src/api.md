@@ -36,3 +36,10 @@ co2_file
 run_members
 GREBExperiments.write_members
 ```
+
+## Plots
+
+```@docs
+plot_response
+plot_gregory
+```

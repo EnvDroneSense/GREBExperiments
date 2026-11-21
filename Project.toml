@@ -9,7 +9,14 @@ GREBClimate = "128c3379-415a-4bc6-90bd-d536e37a6aec"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
+[weakdeps]
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+
+[extensions]
+GREBExperimentsPlotsExt = "Plots"
+
 [compat]
+Plots = "1.41"
 GREBClimate = "~2.3"
 julia = "1.10"
 

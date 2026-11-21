@@ -9,4 +9,5 @@ include("support.jl")
     include("test_reducing.jl")
     include("test_io.jl")
     include("test_driver.jl")
+    include("test_plots.jl")
 end

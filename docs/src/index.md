@@ -27,4 +27,5 @@ The scripts need the model's input dataset in a local copy and never download it
 | [Climate sensitivity](@ref) | The Gregory estimate of forcing, feedback and sensitivity |
 | [Map diagnostics](@ref) | Area-weighted means, zonal means, polar amplification, land and ocean, pattern correlation |
 | [Fitting a cycle](@ref) | Amplitude, lag and mean of a periodic response |
+| [Plots and the notebook](@ref) | The two experiment plots and the Pluto notebook for students |
 | [API Reference](@ref) | Every exported function |

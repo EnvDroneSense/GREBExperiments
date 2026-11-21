@@ -30,7 +30,8 @@ makedocs(
             "Reducing a run" => "reducing.md",
             "Climate sensitivity" => "sensitivity.md",
             "Map diagnostics" => "maps.md",
-            "Fitting a cycle" => "series.md"
+            "Fitting a cycle" => "series.md",
+            "Plots and the notebook" => "plots.md"
         ],
         "API Reference" => "api.md"
     ]

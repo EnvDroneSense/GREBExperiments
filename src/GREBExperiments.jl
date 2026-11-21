@@ -17,5 +17,6 @@ include("series.jl")
 include("reducing.jl")
 include("io.jl")
 include("driver.jl")
+include("plots.jl")
 
 end # module
