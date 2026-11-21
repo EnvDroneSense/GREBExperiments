@@ -19,7 +19,7 @@ The tests need no dataset. The scripts do: they read a local copy of the GREBCli
 |:-----|:------|
 | `src/` | The package `GREBExperiments`: pure helpers, none of which runs the model |
 | `scripts/` | Scripts that run the model and use the helpers. Output goes to `scripts/out/` (ignored by git) |
-| `test/` | One file per group of helpers; `support.jl` holds the fixtures |
+| `test/` | One `test_x.jl` per `src/x.jl`; `support.jl` holds the fixtures |
 | `docs/` | The Documenter site |
 
 ## Adding an experiment script

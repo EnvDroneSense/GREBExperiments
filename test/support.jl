@@ -5,6 +5,7 @@ using GREBClimate
 using GREBClimate: lat_grid, is_land, MonthlyRecord
 using Logging: with_logger, NullLogger
 
+const ET = GREBExperiments
 const X, Y, N = xdim, ydim, nstep_yr
 
 """Run `f` with the logger muted - the model logs a progress line per year."""

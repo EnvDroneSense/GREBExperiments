@@ -6,7 +6,7 @@ The scripts in `scripts/` run the model to answer a question. They need the loca
 |:-------|:--------|:-----------------|
 | `sensitivity.jl` | What is the effective climate sensitivity of an abrupt-CO2 preset? | Minutes for 100 years |
 | `co2_sweep.jl` | How does the last-year climate change with the CO2 level? | Minutes for the default 5 levels of 30 years; hours for a full curve |
-| `src/helpers.jl` | The module `GREBExperiments` that both scripts use | Not run |
+| `src/` | The module `GREBExperiments` that both scripts use | Not run |
 
 ## The sensitivity script
 
@@ -61,7 +61,7 @@ The levels run side by side, which is why it wants several threads. Each running
 
 ## GREBExperiments
 
-`src/helpers.jl` is the module `GREBExperiments`. Its functions are pure: none runs the model, and every mean is area-weighted. Load it with `using GREBExperiments: summarize, gregory`.
+`src/` is the module `GREBExperiments`. Its functions are pure: none runs the model, and every mean is area-weighted. Load it with `using GREBExperiments: summarize, gregory`.
 
 | Function | Returns |
 |:---------|:--------|
@@ -77,4 +77,4 @@ The levels run side by side, which is why it wants several threads. Each running
 | `run_members(reduce, run, configs; labels, outdir, name)` | Runs the members, returns one row each, and writes `<name>.csv` and `<name>_manifest.toml` |
 | `co2_file(path, years, values)` | Writes a `year ppm` file for `CO2File(path)`; returns the path |
 
-`test/test_helpers.jl` tests the helpers; run `julia --project=. -e 'using Pkg; Pkg.test()'` after changing them.
+Each `src/x.jl` has a `test/test_x.jl`; run `julia --project=. -e 'using Pkg; Pkg.test()'` after changing them.

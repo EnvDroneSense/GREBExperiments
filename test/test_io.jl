@@ -1,4 +1,4 @@
-# co2_file writes what GREBClimate reads back.
+# src/io.jl: co2_file writes what GREBClimate reads back.
 
 @testset "co2_file round trip" begin
     mktempdir() do dir

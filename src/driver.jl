@@ -1,7 +1,7 @@
-# Run a set of model members and write one row per member to a CSV file, with a
-# manifest that records how the rows were made. Needs only standard libraries.
+# Run a set of model members and return one row per member; with `outdir` the rows
+# go to a CSV file and a manifest (see io.jl).
 
-const MANIFEST_VERSION = 1
+export run_members
 
 """
     run_members(reduce, run, configs; labels, outdir=nothing, name="members",
@@ -33,46 +33,3 @@ function run_members(reduce, run::G.RunSpec, configs; labels::AbstractVector{<:N
     outdir === nothing || write_members(outdir, name, rows, run, members)
     return rows
 end
-
-"""
-    write_members(outdir, name, rows, run, configs)
-
-Write the CSV and the manifest that [`run_members`](@ref) writes. Returns the
-CSV path.
-"""
-function write_members(outdir::AbstractString, name::AbstractString, rows, run, configs)
-    mkpath(outdir)
-    columns = collect(keys(rows[1]))
-    csv = joinpath(outdir, name * ".csv")
-    open(csv, "w") do io
-        println(io, join(columns, ","))
-        for r in rows
-            println(io, join((_csv_cell(r[c]) for c in columns), ","))
-        end
-    end
-    manifest = Dict{String,Any}(
-        "manifest_version" => MANIFEST_VERSION,
-        "written" => string(Dates.now()),
-        "julia" => string(VERSION),
-        "GREBClimate" => string(pkgversion(G)),
-        "GREBExperiments" => string(pkgversion(@__MODULE__)),
-        "threads" => Threads.nthreads(),
-        "csv" => basename(csv),
-        "columns" => string.(columns),
-        "run" => Dict{String,Any}("ctrl" => run.ctrl, "scnr" => run.scnr),
-        "members" => [Dict{String,Any}("index" => i, "config" => repr(c)) for (i, c) in enumerate(configs)])
-    open(joinpath(outdir, name * "_manifest.toml"), "w") do io
-        TOML.print(io, manifest)
-    end
-    return csv
-end
-
-# A cell holds a number, a bool or a short string; a comma or quote in a string
-# would break the line, so it is refused
-_csv_cell(x::Union{Real,Bool}) = string(x)
-_csv_cell(::Nothing) = ""
-function _csv_cell(x::AbstractString)
-    any(c -> c in (',', '"', '\n'), x) && throw(ArgumentError("a CSV cell must not contain a comma, quote or newline: $x"))
-    return String(x)
-end
-_csv_cell(x::Symbol) = _csv_cell(string(x))
