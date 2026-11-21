@@ -77,40 +77,50 @@ end
 """
     annual_means(records, times, f)
 
-`(years, values)`: for each year with all 12 months among `records`, the mean
-over the year of `f(record)`, where `f` is a field name (the area-weighted mean
-of that field) or a function of a record that returns a number. `times` holds
-the `(year, month)` of each record.
+`(years, values, dropped)`: for each year with all 12 months among `records`,
+the mean over the year of `f(record)`, where `f` is a field name (the
+area-weighted mean of that field) or a function of a record that returns a
+number. `dropped` lists the years with fewer than 12 months. `times` holds the
+`(year, month)` of each record; a `(year, month)` that occurs twice, as in two
+joined runs, throws an `ArgumentError`.
 """
 function annual_means(records, times, f)
     length(records) == length(times) || throw(DimensionMismatch("$(length(records)) records, $(length(times)) times"))
     value(rec) = f isa Symbol ? global_mean(getproperty(rec, f)) : Float64(f(rec))
     sums = Dict{Int,Float64}()
     months = Dict{Int,Int}()
+    seen = Set{Tuple{Int,Int}}()
     for (rec, t) in zip(records, times)
+        (t.year, t.month) in seen && throw(ArgumentError("month $(t.month) of year $(t.year) occurs twice"))
+        push!(seen, (t.year, t.month))
         sums[t.year] = get(sums, t.year, 0.0) + value(rec)
         months[t.year] = get(months, t.year, 0) + 1
     end
     years = sort!([y for (y, n) in months if n == 12])
-    return years, [sums[y] / 12 for y in years]
+    dropped = sort!([y for (y, n) in months if n < 12])
+    return (years=years, values=[sums[y] / 12 for y in years], dropped=dropped)
 end
 
+# Largest allowed size of a monthly anomaly per field [K, kg/kg]: above a strong
+# forced change, below a diverged run
+const ANOMALY_LIMITS = (Ts=80.0, Ta=80.0, To=40.0, q=0.04)
+
 """
-    in_range_report(records, times, anomaly)
+    in_range_report(records, times, anomaly; anomaly_limits=ANOMALY_LIMITS)
 
 `nothing` when every record is finite and inside the allowed range, otherwise
 `(year, month, field, value)` of the first one that is not. For absolute
 records the range is that of `GREBClimate.RangeCheck()` for `Ts`, `Ta`, `To`
-and `q`. For anomalies a value is allowed to be as large as the width of that
-range.
+and `q`. For anomalies the size of a value must not exceed the field's entry
+in `anomaly_limits` (80 K for `Ts` and `Ta`, 40 K for `To`, 0.04 kg/kg for `q`).
 """
-function in_range_report(records, times, anomaly::Bool)
+function in_range_report(records, times, anomaly::Bool; anomaly_limits::NamedTuple=ANOMALY_LIMITS)
     limits = G.RangeCheck().limits
     for (rec, t) in zip(records, times), field in keys(limits)
 
         lower, upper = limits[field]
         for x in getproperty(rec, field)
-            ok = anomaly ? isfinite(x) && abs(x) <= upper - lower : lower <= x <= upper
+            ok = anomaly ? isfinite(x) && abs(x) <= anomaly_limits[field] : lower <= x <= upper
             ok || return (year=t.year, month=t.month, field=field, value=x)
         end
     end
@@ -153,17 +163,35 @@ run. Fits `dnet = forcing + feedback * dTs`.
 
 Returns `forcing` (W/m2), `feedback` (W/m2/K), `sensitivity` (K, the warming at
 which the fit reaches zero net flux, `-forcing / feedback`), `r2`, `reached` (the
-last `dTs`) and `remaining` (the last `dnet`). The sensitivity can differ from
-`reached`: `sw - olr` is not the whole budget of the anomaly.
+last `dTs`), `remaining` (the last `dnet`) and `closure` (`reached / sensitivity`).
+
+The sensitivity can differ from `reached`, so `closure` can differ from 1 even
+near equilibrium: `sw - olr` is not the whole budget of the anomaly. Two flows
+outside it also change with the warming: the latent heat of the open water
+budget (evaporation and rain do not balance) and the heat sink of the
+transport. In an abrupt 2xCO2 run they make the sensitivity about 10 percent
+lower than the warming the run reaches.
+
+A constant `dTs` throws an `ArgumentError`. A `feedback >= 0` (no stable
+equilibrium on the fitted line) gives `sensitivity` and `closure` as `NaN`, with
+a warning.
 """
 function gregory(dTs::AbstractVector{<:Real}, dnet::AbstractVector{<:Real})
     length(dTs) == length(dnet) >= 3 || throw(ArgumentError("need at least three annual values of each series"))
     x, y = Float64.(dTs), Float64.(dnet)
     mx, my = sum(x) / length(x), sum(y) / length(y)
-    feedback = sum((x .- mx) .* (y .- my)) / sum(abs2, x .- mx)
+    sxx = sum(abs2, x .- mx)
+    sxx > 0 || throw(ArgumentError("dTs is constant: the slope is undefined"))
+    feedback = sum((x .- mx) .* (y .- my)) / sxx
     forcing = my - feedback * mx
     residual = y .- (forcing .+ feedback .* x)
     r2 = 1 - sum(abs2, residual) / sum(abs2, y .- my)
-    return (forcing=forcing, feedback=feedback, sensitivity=(-forcing / feedback), r2=r2,
-        reached=x[end], remaining=y[end])
+    sensitivity = if feedback < 0
+        -forcing / feedback
+    else
+        @warn "gregory: feedback is $feedback W/m2/K (not negative); the sensitivity is undefined"
+        NaN
+    end
+    return (forcing=forcing, feedback=feedback, sensitivity=sensitivity, r2=r2,
+        reached=x[end], remaining=y[end], closure=x[end] / sensitivity)
 end

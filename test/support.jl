@@ -31,7 +31,7 @@ function synthetic_fields()
     f.To_clim .= 283.0f0
     f.cloud_clim .= 0.5f0
     f.soil_wetness_clim .= 0.4f0
-    GREBClimate.split_winds!(f)
+    # greb_model! derives the split winds and the other derived fields itself
     return f
 end
 

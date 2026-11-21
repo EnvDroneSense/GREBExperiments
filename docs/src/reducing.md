@@ -10,7 +10,7 @@ A `greb_model!` run returns one record per month for the control and for the sce
 
 ## Annual means
 
-`annual_means(records, times, f)` groups the records by calendar year and averages the global mean of each. A year counts only when all 12 months are present, so a run that ends in June does not return a half-year value that looks like a full one. `f` is a field name, such as `:Ts`, or a function of one record that returns a number.
+`annual_means(records, times, f)` groups the records by calendar year and averages the global mean of each. A year counts only when all 12 months are present, so a run that ends in June does not return a half-year value that looks like a full one. The third result, `dropped`, lists those incomplete years. A `(year, month)` that occurs twice, as in two joined runs, is an error. `f` is a field name, such as `:Ts`, or a function of one record that returns a number.
 
 Records are anything that has the fields asked for. Here two years of records of a uniform surface temperature, one value per month:
 
@@ -21,7 +21,7 @@ julia> record(v) = (Ts = fill(Float32(v), xdim, ydim),);
 
 julia> times = [(year = 1950 + (i - 1) ÷ 12, month = mod1(i, 12)) for i in 1:24];
 
-julia> years, values = annual_means([record(m) for m in 1:24], times, :Ts);
+julia> years, values, dropped = annual_means([record(m) for m in 1:24], times, :Ts);
 
 julia> years
 2-element Vector{Int64}:
@@ -32,6 +32,9 @@ julia> values
 2-element Vector{Float64}:
   6.5
  18.5
+
+julia> dropped
+Int64[]
 ```
 
 The mean of the months 1 to 12 is 6.5 and of 13 to 24 is 18.5. Every mean is area-weighted: a cell near the pole counts less than a cell on the equator. With a function, a derived quantity can be averaged, for example the net top-of-atmosphere flux `rec -> global_mean(rec.sw) - global_mean(rec.olr)`.
@@ -50,7 +53,7 @@ The result is a few kilobytes. Keep it, drop the result, and the memory is free 
 
 ## Checking that a run stayed in range
 
-A model run that diverges does not fail; it produces large or non-finite numbers. `in_range_report(records, times, anomaly)` returns `nothing` when every value is finite and inside the allowed range, and otherwise the year, month, field and value of the first record that is not. The range is the one of `GREBClimate.RangeCheck()` for `Ts`, `Ta`, `To` and `q`. For anomalies the bound is the width of that range, since an anomaly can be negative.
+A model run that diverges does not fail; it produces large or non-finite numbers. `in_range_report(records, times, anomaly)` returns `nothing` when every value is finite and inside the allowed range, and otherwise the year, month, field and value of the first record that is not. The range is the one of `GREBClimate.RangeCheck()` for `Ts`, `Ta`, `To` and `q`. For anomalies the size of a value must not exceed a limit per field: 80 K for `Ts` and `Ta`, 40 K for `To`, 0.04 kg/kg for `q`. These limits are far above a strong forced change and far below a diverged run. Give other limits with the keyword `anomaly_limits`.
 
 ```jldoctest
 julia> using GREBExperiments, GREBClimate

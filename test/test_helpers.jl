@@ -7,7 +7,11 @@ const ET = GREBExperiments
     g = ET.gregory(dT, 5.0 .- 2.0 .* dT)
     @test g.forcing ≈ 5.0 && g.feedback ≈ -2.0 && g.sensitivity ≈ 2.5 && g.r2 ≈ 1
     @test g.reached == dT[end] && g.remaining ≈ 5.0 - 2.0 * dT[end]
+    @test g.closure ≈ dT[end] / 2.5
     @test_throws ArgumentError ET.gregory([1.0, 2.0], [1.0, 2.0])
+    @test_throws ArgumentError ET.gregory(fill(1.0, 5), collect(1.0:5.0))
+    rising = @test_logs (:warn,) ET.gregory(dT, 1.0 .+ dT)
+    @test isnan(rising.sensitivity) && isnan(rising.closure)
 end
 
 @testset "map diagnostics" begin
@@ -48,11 +52,13 @@ end
 @testset "annual means group by record time" begin
     times = record_times(1950, 30)
     records = [uniform_record(Float32(m)) for m in 1:30]
-    years, values = ET.annual_means(records, times, :Ts)
-    @test years == [1950, 1951]                      # 1952 has six months only
+    years, values, dropped = ET.annual_means(records, times, :Ts)
+    @test years == [1950, 1951] && dropped == [1952] # 1952 has six months only
     @test values ≈ [gmean(1:12), gmean(13:24)]
     @test ET.annual_means(records, times, rec -> 2 * rec.Ts[1, 1])[2] ≈ 2 .* values
     @test_throws DimensionMismatch ET.annual_means(records, times[1:5], :Ts)
+    # Two joined runs that repeat a year are refused
+    @test_throws ArgumentError ET.annual_means([records; records[1:12]], [times; times[1:12]], :Ts)
 end
 
 @testset "in_range_report" begin
@@ -68,6 +74,10 @@ end
     @test ET.in_range_report(small, times, true) === nothing
     @test ET.in_range_report(small, times, false).field == :Ts
     @test ET.in_range_report([uniform_record(1.0f24; q=0.001f0)], times[1:1], true).field == :Ts
+    # A run that diverged by 100 K is caught, not hidden inside the absolute range width
+    @test ET.in_range_report([uniform_record(100.0f0; q=0.001f0)], times[1:1], true).field == :Ts
+    @test ET.in_range_report([uniform_record(100.0f0; q=0.001f0)], times[1:1], true;
+        anomaly_limits=(Ts=200.0, Ta=200.0, To=200.0, q=0.04)) === nothing
 end
 
 @testset "summarize reduces a model result" begin
@@ -77,7 +87,9 @@ end
     @test all(length(s.scnr[k]) == 2 for k in (:Ts, :precip, :ice, :net))
     @test s.ctrl.Ts[1] ≈ gmean([global_mean(r.Ts) for r in result.ctrl])
     @test s.scnr.net[2] ≈ gmean([global_mean(r.sw) - global_mean(r.olr) for r in result.scnr[13:24]])
-    @test s.out_of_range == (ctrl=nothing, scnr=nothing)
+    # The synthetic fields are not a climate: the scenario drifts about 100 K from
+    # its control, which the anomaly limit catches
+    @test s.out_of_range.ctrl === nothing && s.out_of_range.scnr.field == :Ts
 
     # A scenario can leave the range while its control is fine
     broken = merge(result, (scnr=[uniform_record(1.0f24; q=0.001f0); result.scnr[2:end]],))

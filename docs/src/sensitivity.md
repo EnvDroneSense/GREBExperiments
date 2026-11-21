@@ -20,8 +20,9 @@ N = F + \lambda \, \Delta T
 | `r2` | How well a straight line describes the run |
 | `reached` | The last `dTs` of the run |
 | `remaining` | The last `dnet` of the run |
+| `closure` | `reached / sensitivity`; 1 when the fit agrees with the warming the run reaches |
 
-It needs at least three annual values.
+It needs at least three annual values, and `dTs` must not be constant. A `feedback` that is not negative gives `sensitivity` and `closure` as `NaN`, with a warning.
 
 ```jldoctest
 julia> using GREBExperiments
@@ -56,6 +57,6 @@ g = gregory(s.scnr.Ts, s.scnr.net)
 ## What the number means
 
 - The sensitivity is an effective one: it comes from the first decades of a run, not from equilibrium. The deep ocean has not yet warmed, so a longer run can give another value.
-- It can differ from `reached`. The net flux here is `sw - olr`, which is not the whole energy budget of the scenario anomaly. `remaining` shows how much of the imbalance is left at the end.
+- It can differ from `reached`. The net flux here is `sw - olr`, which is not the whole energy budget of the scenario anomaly. Two other flows change with the warming: the latent heat of the open water budget (evaporation and rain do not balance) and the heat sink of the transport. In an abrupt 2xCO2 run they make the sensitivity about 10 percent lower than the warming the run reaches; `closure` shows the ratio, and `remaining` shows how much of the imbalance is left at the end.
 - It is meaningful only for a preset whose scenario output is an anomaly (`scnr_anomaly` is `true`) and whose forcing is applied at once.
 - A low `r2` means the response is not a straight line over the years used, for example because of sea ice or a changing forcing. Do not read the sensitivity then.
