@@ -19,7 +19,7 @@ the entry of its field in `anomaly_limits`: by default 80 K for `Ts` and `Ta`,
 40 K for `To` and 0.08 kg/kg for `q`.
 
 The records are monthly means, so the function does not see a short excursion
-inside a month or a value in a different field. For a member that can diverge,
+inside a month. It does not test the other fields. For a member that can diverge,
 also give `GREBClimate.RangeCheck()` as the `observer` of `greb_model!`.
 """
 function in_range_report(records, times, anomaly::Bool; anomaly_limits::NamedTuple=ANOMALY_LIMITS)
