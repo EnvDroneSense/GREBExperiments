@@ -2,14 +2,14 @@
 #
 #   julia --project=. -t 4,0 scripts/co2_sweep.jl [levels] [scenario years] [spin-up years] [control years]
 #
-# Holds CO2 at each of `levels` values (default 5), log-spaced between 170 ppm
-# (:co2_half) and 3400 ppm (:co2_10x), for the scenario years (default 30) after
-# a spin-up (default 3) and a control at 280 ppm (default 5); the output
-# repeats the control CO2. Prints, and writes to scripts/out/co2_sweep.csv, the
-# anomaly of the last scenario year: global-mean Ts, ice cover and
-# precipitation, and whether a monthly record left the allowed range. For a full curve use
-# `... 20 100`, which takes hours. Needs the local dataset and several threads;
-# each running level holds 370 MB of fields.
+# Defaults: 5 levels, 30 scenario years, 3 spin-up years, 5 control years.
+# The levels are log-spaced from 170 ppm (:co2_half) to 3400 ppm (:co2_10x); the
+# control is at 280 ppm. For each level, the script prints the anomaly of the
+# last scenario year (global-mean Ts, ice cover, precipitation) and whether a
+# record left the allowed range. It writes the rows to scripts/out/co2_sweep.csv.
+#
+# A full curve (`... 20 100`) takes hours. The script needs the local dataset and
+# several threads. Each running level holds 370 MB of fields.
 
 using GREBClimate
 using GREBExperiments: annual_means, in_range_report, run_members
@@ -29,7 +29,7 @@ function main(args)
     configs = [Config(scenario=Scenario(co2=ConstantCO2(c), control_co2=control_co2), corrections=SpinUp(spinup))
                for c in co2]
 
-    # Only the last-year anomalies leave each task
+    # Keep only the last-year anomalies, so a member frees its fields when it ends.
     last_year(result, field) = annual_means(result.scnr, result.scnr_time, field)[2][end]
     labels = [(co2_ppm=c, control_co2_ppm=control_co2) for c in co2]
     rows = run_members(RunSpec(ctrl=ctrl, scnr=years), configs; labels, fields, jld2_dir=dir,

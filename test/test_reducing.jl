@@ -26,9 +26,9 @@ end
     @test all(length(s.scnr[k]) == 2 for k in (:Ts, :precip, :ice, :net))
     @test s.ctrl.Ts[1] ≈ gmean([global_mean(r.Ts) for r in result.ctrl])
     @test s.scnr.net[2] ≈ gmean([global_mean(r.sw) - global_mean(r.olr) for r in result.scnr[13:24]])
-    # The synthetic fields are not a climate: the scenario drifts about 100 K from
-    # its control, which the anomaly limit catches
     @test isnan(s.drift)                             # one control year: no drift to measure
+    # The synthetic fields are not a climate: the scenario drifts approximately
+    # 100 K from its control, and the anomaly limit finds this.
     @test s.out_of_range.ctrl === nothing && s.out_of_range.scnr.field == :Ts
 
     # A scenario can leave the range while its control is fine

@@ -2,7 +2,7 @@
 
 Experiments on the [GREB climate model](https://github.com/EnvDroneSense/GREBClimate.jl): what happens to a simple, fast climate model when you push it in different ways, and the tools to measure it.
 
-GREB runs a 96 x 48 grid with a 12-hour step; 100 simulated years take minutes, and several variants can run side by side. That suits questions that a full climate model is too slow to answer for a whole range of settings. The model package stays stable and lives in its own repository; this one holds the questions.
+GREB runs a 96 x 48 grid with a 12-hour step. 100 simulated years take minutes, and several variants can run in parallel. Thus GREB can answer questions over a full range of settings, where a full climate model is too slow. The model package stays stable in its own repository. This repository holds the questions.
 
 Documentation: <https://envdronesense.github.io/GREBExperiments/dev/> (published once the repository is public).
 
@@ -12,8 +12,10 @@ Documentation: <https://envdronesense.github.io/GREBExperiments/dev/> (published
 |:-----|:------|
 | `scripts/sensitivity.jl` | Effective climate sensitivity of an abrupt-CO2 preset, from the Gregory regression |
 | `scripts/co2_sweep.jl` | The last-year climate over a range of CO2 levels, run side by side |
-| `src/` | The Julia package `GREBExperiments`: helpers that reduce a run to a few numbers (annual means, Gregory estimate, map diagnostics, cycle fit) |
-| `test/` | Tests of the helpers; they run without the dataset |
+| `src/` | The Julia package `GREBExperiments`: it runs sets of members, reduces a run to a few numbers (annual means, Gregory estimate, map diagnostics, cycle fit) and writes the rows to files |
+| `ext/` | The plot methods; they load with Plots.jl |
+| `notebooks/` | A Pluto notebook for students |
+| `test/` | Tests of the package; they run without the dataset |
 | `docs/` | The documentation site |
 
 ## Questions I want to explore
@@ -46,9 +48,9 @@ cd GREBExperiments
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 ```
 
-GREBClimate is pinned to one minor version (`~2.3`), since the helpers use some names it does not export. Raise the pin only after the tests pass against the new release. To work against a local checkout of the model, run `Pkg.develop(path="../GREB-julia")`; `Manifest.toml` is not committed.
+GREBClimate is pinned to one minor version (`~2.3`), because the helpers use some names that it does not export. Raise the pin only after the tests pass against the new release. To work against a local clone of the model, run `Pkg.develop(path="../GREB-julia")`. `Manifest.toml` is not committed.
 
-The scripts read the model's input dataset from a local copy and never download it; see the GREBClimate documentation.
+The scripts read a local copy of the input dataset of the model and never download it. See the GREBClimate documentation.
 
 ## Run
 
@@ -58,7 +60,7 @@ julia --project=. -t 4,0 scripts/co2_sweep.jl 5 30
 julia --project=. -e 'using Pkg; Pkg.test()'
 ```
 
-Results go to `scripts/out/`, which git ignores. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to add a script or a helper.
+The results go to `scripts/out/`, which git ignores. [CONTRIBUTING.md](CONTRIBUTING.md) tells how to add a script or a helper.
 
 ## Origin
 

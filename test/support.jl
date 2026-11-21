@@ -1,6 +1,5 @@
-# Fixtures for the tests: a small climate on the model grid, so the tests run
-# without the dataset. Copied from the GREBClimate.jl test support; keep them
-# in step by hand when the package changes.
+# Fixtures on the model grid, so the tests run without the dataset. They are a
+# copy of the GREBClimate.jl test support: update them by hand when it changes.
 using GREBClimate
 using GREBClimate: lat_grid, is_land, MonthlyRecord
 using Logging: with_logger, NullLogger

@@ -1,6 +1,6 @@
 # Contributing to GREBExperiments
 
-This repository holds experiments on the GREB model and the helpers that analyse them. Bug reports, new experiments and documentation fixes are welcome. Open an issue first for anything larger than a fix, so the question and the approach can be agreed.
+This repository holds experiments on the GREB model and the helpers that analyse them. Bug reports, new experiments and documentation fixes are welcome. For a change that is larger than a fix, open an issue first to agree on the question and the approach.
 
 ## Getting set up
 
@@ -11,14 +11,16 @@ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 julia --project=. -e 'using Pkg; Pkg.test()'
 ```
 
-The tests need no dataset. The scripts do: they read a local copy of the GREBClimate input data and never download it.
+The tests need no dataset. The scripts read a local copy of the GREBClimate input data and never download it.
 
 ## Layout
 
 | Path | Holds |
 |:-----|:------|
-| `src/` | The package `GREBExperiments`: pure helpers, none of which runs the model |
-| `scripts/` | Scripts that run the model and use the helpers. Output goes to `scripts/out/` (ignored by git) |
+| `src/` | The package `GREBExperiments`, one flat module. `driver.jl` runs the model and `io.jl` writes files; the other files are pure helpers. `plots.jl` holds the plot stubs |
+| `ext/` | The plot methods, loaded with Plots.jl |
+| `scripts/` | Scripts that run the model and use the package. The output goes to `scripts/out/` (ignored by git) |
+| `notebooks/` | The Pluto notebook for students |
 | `test/` | One `test_x.jl` per `src/x.jl`; `support.jl` holds the fixtures |
 | `docs/` | The Documenter site |
 
@@ -35,16 +37,16 @@ The tests need no dataset. The scripts do: they read a local copy of the GREBCli
 
 A helper goes in `src/` when two scripts need it or when it can be tested on its own.
 
-1. It is a pure function of its arguments: it does not run the model and does not read files.
-2. Give it a docstring with a signature, what it returns and the units. Export it from `src/GREBExperiments.jl`; the docs build fails on an exported name without a docstring.
-3. Add a testset to `test/` that fails when the function is wrong. Test with small synthetic input; a test must not need the dataset, since CI has none.
-4. Add it to the helper page it belongs to in `docs/src/`, with an example that runs as a doctest, and to `docs/src/api.md`.
+1. Make it a pure function of its arguments where possible. Only `driver.jl` runs the model and only `io.jl` writes files.
+2. Give it a docstring with a signature, what it returns and the units. The docstring is the source of truth. Export the name in the `export` line of its source file. The docs build fails on an exported name without a docstring.
+3. Add a testset to the `test/test_x.jl` of its source file. The testset must fail when the function is wrong. Test with small synthetic input: a test must not need the dataset, because CI has none.
+4. Add it to `docs/src/api.md`. On the helper page it belongs to, explain its use with an example that runs as a doctest, and link to the docstring with `@ref`.
 
 ## The model dependency
 
-GREBClimate is pinned to one minor version (`~2.3` in `Project.toml` and `docs/Project.toml`). The helpers reach a few names the model does not export (`GREBClimate.lat_grid`, `is_land`, `dxlat_grid`, `RangeCheck`), so a new model release can break them.
+GREBClimate is pinned to one minor version (`~2.3` in `Project.toml` and `docs/Project.toml`). The helpers use four names that the model does not export (`GREBClimate.lat_grid`, `is_land`, `dxlat_grid`, `RangeCheck`), so a new model release can break them.
 
-- Use exported names where they exist. Do not add a new reach into internals without saying so in the pull request.
+- Use exported names where they exist. Do not use more internal names: export the name in GREBClimate first.
 - To move to a new model release, change both pins, run the tests and the docs build, and fix what breaks in the same pull request.
 
 ## Checks before a pull request

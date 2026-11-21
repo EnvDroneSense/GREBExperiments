@@ -1,24 +1,26 @@
 # Reduce a `greb_model!` result to a few numbers and check that it stayed in range.
-# `summarize` reads the result's `scnr_anomaly` to tell anomalies from absolute records.
 
 export in_range_report, summarize
 
-# Largest allowed size of a monthly anomaly per field [K, kg/kg]: above a strong
-# forced change, below a diverged run
+# Largest allowed size of a monthly anomaly per field [K, kg/kg]. Each limit is
+# far above a strong forced change and far below a diverged run.
 const ANOMALY_LIMITS = (Ts=80.0, Ta=80.0, To=40.0, q=0.08)
 
 """
     in_range_report(records, times, anomaly; anomaly_limits=ANOMALY_LIMITS)
 
-`nothing` when every record is finite and inside the allowed range, otherwise
-`(year, month, field, value)` of the first one that is not. For absolute
-records the range is that of `GREBClimate.RangeCheck()` for `Ts`, `Ta`, `To`
-and `q`. For anomalies the size of a value must not exceed the field's entry
-in `anomaly_limits` (80 K for `Ts` and `Ta`, 40 K for `To`, 0.08 kg/kg for `q`).
+Return `nothing` when all values of `Ts`, `Ta`, `To` and `q` in `records` are
+finite and in the allowed range. Otherwise return `(year, month, field, value)`
+of the first value that is not. `times` holds the `(year, month)` of each record.
 
-The records are monthly means: a short excursion inside a month, or in a field
-that is not tested, is not seen. For a member that can diverge, also pass
-`GREBClimate.RangeCheck()` as the `observer` of `greb_model!`.
+For absolute records (`anomaly=false`), the range is that of
+`GREBClimate.RangeCheck()`. For anomalies, the size of a value must not exceed
+the entry of its field in `anomaly_limits`: by default 80 K for `Ts` and `Ta`,
+40 K for `To` and 0.08 kg/kg for `q`.
+
+The records are monthly means, so the function does not see a short excursion
+inside a month or a value in a different field. For a member that can diverge,
+also give `GREBClimate.RangeCheck()` as the `observer` of `greb_model!`.
 """
 function in_range_report(records, times, anomaly::Bool; anomaly_limits::NamedTuple=ANOMALY_LIMITS)
     limits = G.RangeCheck().limits
@@ -36,15 +38,17 @@ end
 """
     summarize(result)
 
-Reduce a `greb_model!` result to a few kilobytes: for the control and the
-scenario, the annual global means of `Ts`, `precip`, `ice` and the top-of-atmosphere
-net (`sw - olr`), with their years (`ice` is the ice fraction, 0 to 1); whether
-the scenario is an anomaly; `drift`, the change of the control's annual `Ts`
-from its first to its last year [K] (`NaN` for one year; a control that is in
-equilibrium has none); and
-`out_of_range`, the first record outside the range (`nothing` when none; see
-[`in_range_report`](@ref)). The control and the scenario are both tested, since a
-scenario can leave the range while its control is fine.
+Reduce a `greb_model!` result to a few kilobytes and return a `NamedTuple`:
+
+| Field | Content |
+|:------|:--------|
+| `ctrl`, `scnr` | `(years, Ts, precip, ice, net)`: the complete years and the annual global means. `ice` is the ice fraction (0 to 1). `net` is the top-of-atmosphere net flux `sw - olr` |
+| `scnr_anomaly` | `true` when the scenario records are anomalies from the control |
+| `drift` | The change of the annual `Ts` of the control from its first to its last year [K]; `NaN` for one year. A control in equilibrium has no drift |
+| `out_of_range` | `(ctrl, scnr)`: for each phase, `nothing` or the first record out of range (see [`in_range_report`](@ref)) |
+
+The function tests the control and the scenario separately, because a scenario
+can leave the range while its control stays in range.
 """
 function summarize(result)
     series(records, times) = begin

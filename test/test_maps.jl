@@ -29,9 +29,9 @@
     @test_throws DimensionMismatch ET.area_mean(a, trues(3, 3))
     @test_throws DimensionMismatch ET.zonal_mean(zeros(Float32, 3, 3))
     @test_throws ArgumentError ET.pattern_correlation(ones_map, a)
-    # Two weight implementations agree on a map that is not constant
+    # The weights here and in GREBClimate agree on a map that is not constant
     @test ET.area_mean(a) ≈ global_mean(a)
-    # Zero global mean: the ratio is meaningless, the means are still given
+    # With a zero global mean the ratio has no meaning, but the means are still given
     zero_mean = a .- Float32(ET.area_mean(a))
     @test abs(ET.polar_amplification(zero_mean).global_mean) < 1e-5
 end

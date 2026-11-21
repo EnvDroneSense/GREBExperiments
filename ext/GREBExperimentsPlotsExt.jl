@@ -1,4 +1,4 @@
-# The plot methods of GREBExperiments; loaded when Plots.jl is loaded.
+# The methods of the plot stubs in src/plots.jl. Julia loads them with Plots.jl.
 module GREBExperimentsPlotsExt
 
 using GREBExperiments: GREBExperiments, gregory
@@ -16,6 +16,7 @@ end
 function GREBExperiments.plot_gregory(dTs::AbstractVector{<:Real}, dnet::AbstractVector{<:Real})
     g = gregory(dTs, dnet)
     p = Plots.scatter(dTs, dnet; label="annual means", xlabel="warming [K]", ylabel="net flux change [W/m2]")
+    # Draw the line to its zero crossing; without a crossing, to the largest warming.
     xs = [0.0, isnan(g.sensitivity) ? maximum(dTs) : g.sensitivity]
     Plots.plot!(p, xs, g.forcing .+ g.feedback .* xs; label="fit: $(round(g.feedback; digits=2)) W/m2/K")
     isnan(g.sensitivity) || Plots.scatter!(p, [g.sensitivity], [0.0]; label="sensitivity $(round(g.sensitivity; digits=2)) K", marker=:star5)

@@ -1,12 +1,15 @@
-# Diagnostics of a (xdim, ydim) map. Pure functions; every mean is area-weighted.
+# Diagnostics of one (xdim, ydim) map. All means are area-weighted.
 
 export area_mean, zonal_mean, polar_amplification, land_ocean, pattern_correlation
 
 """
     area_mean(map, mask=nothing)
 
-Area-weighted mean of a (`xdim`, `ydim`) map, over the cells where `mask` is
-`true` when a mask is given. A mask of another type is used as a weight.
+Return the area-weighted mean of a (`xdim`, `ydim`) map. With a `Bool` mask, the
+mean is over the cells where `mask` is `true`. A mask of numbers is a weight.
+
+A map or mask of the wrong size throws a `DimensionMismatch`, so a transposed map
+does not pass silently. A mask that selects no cell throws an `ArgumentError`.
 """
 function area_mean(map::AbstractMatrix, mask=nothing)
     size(map) == (G.xdim, G.ydim) || throw(DimensionMismatch("expected a ($(G.xdim), $(G.ydim)) map, got $(size(map))"))
@@ -17,7 +20,12 @@ function area_mean(map::AbstractMatrix, mask=nothing)
     return sum(Float64.(map) .* w) / sum(w)
 end
 
-"The mean over longitude of a map: one value per latitude row."
+"""
+    zonal_mean(map)
+
+Return the mean over longitude of a (`xdim`, `ydim`) map: one value per latitude
+row.
+"""
 function zonal_mean(map::AbstractMatrix)
     size(map) == (G.xdim, G.ydim) || throw(DimensionMismatch("expected a ($(G.xdim), $(G.ydim)) map, got $(size(map))"))
     return vec(sum(Float64.(map); dims=1)) ./ G.xdim
@@ -26,11 +34,14 @@ end
 """
     polar_amplification(map; latitude=60)
 
-`(north, south, north_mean, south_mean, global_mean)`: `north` and `south` are
-the mean of `map` poleward of `latitude` degrees over its global mean, for each
-hemisphere; the other three are the means themselves. A uniform map gives
-`north = south = 1.0`. When the global mean is near zero (a regional or residual
-map) the ratio is very large or changes sign: use the means then.
+Return `(north, south, north_mean, south_mean, global_mean)`. `north_mean` and
+`south_mean` are the area-weighted means of `map` poleward of `latitude` degrees
+in each hemisphere. `north` and `south` are these means divided by
+`global_mean`. A uniform map gives `north = south = 1.0`.
+
+Give a change, not an absolute temperature: the cold poles give a ratio below 1
+for any absolute map. When the global mean is near zero (a regional or residual
+map), the ratio is very large or changes sign. Use the means then.
 """
 function polar_amplification(map::AbstractMatrix; latitude::Real=60)
     lat = G.lat_grid
@@ -43,8 +54,9 @@ end
 """
     land_ocean(map, z_topo)
 
-`(land, ocean)`: the area-weighted means of `map` over the land and the ocean
-cells, land being where the topography `z_topo` says so.
+Return `(land, ocean)`: the area-weighted means of `map` over the land cells and
+over the ocean cells. The topography `z_topo` of the climatology sets which
+cells are land.
 """
 function land_ocean(map::AbstractMatrix, z_topo::AbstractMatrix)
     land = G.is_land.(z_topo)
@@ -52,8 +64,11 @@ function land_ocean(map::AbstractMatrix, z_topo::AbstractMatrix)
 end
 
 """
-Area-weighted correlation of two maps, about their own weighted means. A
-constant map has no pattern: it throws an `ArgumentError`.
+    pattern_correlation(a, b)
+
+Return the area-weighted correlation of two maps, about their own weighted
+means. A positive scale factor or a shift of a map does not change it. A constant
+map has no pattern and throws an `ArgumentError`.
 """
 function pattern_correlation(a::AbstractMatrix, b::AbstractMatrix)
     ma, mb = area_mean(a), area_mean(b)

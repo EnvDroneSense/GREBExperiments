@@ -1,9 +1,10 @@
 """
     GREBExperiments
 
-Helpers for experiments that run GREBClimate.jl and reduce its results: annual
-and area-weighted means, the Gregory sensitivity estimate, map diagnostics.
-Scripts that use them are in `scripts/`.
+Tools for experiments with GREBClimate.jl. The package runs sets of model
+members, reduces each result to a few numbers (annual and area-weighted means,
+the Gregory sensitivity estimate, map diagnostics) and writes the rows to files.
+The scripts in `scripts/` use these tools.
 """
 module GREBExperiments
 

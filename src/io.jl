@@ -1,17 +1,19 @@
-# Files the package writes: the CO2 file that GREBClimate's `CO2File` reads, and
-# the CSV and manifest of `run_members`. Standard libraries only.
+# Files that the package writes. Only standard libraries, so no new dependency.
 
 export co2_file
 
+# Increase when the layout of the manifest changes.
 const MANIFEST_VERSION = 1
 
 """
     co2_file(path, years, values)
 
-Write a CO2 path as a text file of `year ppm` lines that `CO2File(path)` and
-`load_co2_custom` read, and return `path`. `years` must be integers that do not
-repeat, `values` finite and positive [ppm], and both the same length. Values are
-written at `Float32` precision, which is what the model reads.
+Write a CO2 path as a text file of `year ppm` lines and return `path`.
+`CO2File(path)` and `load_co2_custom` read this file.
+
+`years` and `values` must have the same length. Each year must occur only once.
+Each value [ppm] must be finite and positive. The file holds the values at
+`Float32` precision, because the model reads them at that precision.
 """
 function co2_file(path::AbstractString, years::AbstractVector{<:Integer}, values::AbstractVector{<:Real})
     length(years) == length(values) || throw(DimensionMismatch("$(length(years)) years, $(length(values)) values"))
@@ -29,8 +31,8 @@ end
 """
     write_members(outdir, name, rows, run, configs)
 
-Write the CSV and the manifest that [`run_members`](@ref) writes. Returns the
-CSV path.
+Write the CSV file and the manifest of [`run_members`](@ref), and return the
+path of the CSV file.
 """
 function write_members(outdir::AbstractString, name::AbstractString, rows, run, configs)
     mkpath(outdir)
@@ -59,8 +61,7 @@ function write_members(outdir::AbstractString, name::AbstractString, rows, run, 
     return csv
 end
 
-# A cell holds a number, a bool or a short string; a comma or quote in a string
-# would break the line, so it is refused
+# The CSV has no quoting, so a string with a comma, quote or newline is refused.
 _csv_cell(x::Union{Real,Bool}) = string(x)
 _csv_cell(::Nothing) = ""
 function _csv_cell(x::AbstractString)

@@ -32,7 +32,7 @@ end
 md"""
 # Climate experiments with GREB
 
-Pick an experiment, run it, and read the result. Each step has a short note on what you see.
+Select an experiment, run the model and read the result. Each step has a short note that tells you what you see.
 """
 
 # ╔═╡ f3ba0bca-b8bd-44ed-b9c2-9535466dc414
@@ -71,7 +71,7 @@ summary === nothing ? md"Tick *Run the model* above." :
 # ╔═╡ e844bb50-4e64-4a9e-8a7f-9617cacfcd2f
 md"""## How sensitive is the climate?
 
-Each dot is one year. The line is the fit of net flux against warming; where it reaches zero is the effective climate sensitivity. Only for experiments that give an anomaly, such as `co2_double`."""
+Each dot is one year. The line is the fit of net flux against warming. The warming where the line reaches zero net flux is the effective climate sensitivity. The plot shows only for experiments that give an anomaly, such as `co2_double`."""
 
 # ╔═╡ 16359d25-0783-4a17-88f2-c3f0df3207da
 if summary !== nothing && summary.scnr_anomaly

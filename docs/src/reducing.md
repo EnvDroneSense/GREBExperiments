@@ -1,6 +1,6 @@
 # Reducing a run
 
-A `greb_model!` run returns one record per month for the control and for the scenario: a set of 96 x 48 maps each. A year of records is about 12 maps of every output field, so an ensemble of long runs does not fit in memory. The first job of an experiment script is to reduce each run to a few numbers. These three functions do that.
+A `greb_model!` run returns one record per month for the control and for the scenario. Each record is a set of 96 x 48 maps, so an ensemble of long runs does not fit in memory. Thus the first task of an experiment script is to reduce each run to a few numbers. These three functions do that.
 
 | Function | Input | Output |
 |:---------|:------|:-------|
@@ -10,9 +10,7 @@ A `greb_model!` run returns one record per month for the control and for the sce
 
 ## Annual means
 
-`annual_means(records, times, f)` groups the records by calendar year and averages the global mean of each. A year counts only when all 12 months are present, so a run that ends in June does not return a half-year value that looks like a full one. The third result, `dropped`, lists those incomplete years. The months have equal weight; `month_weights` (12 values) changes that. A `(year, month)` that occurs twice, as in two joined runs, is an error. `f` is a field name, such as `:Ts`, or a function of one record that returns a number.
-
-Records are anything that has the fields asked for. Here two years of records of a uniform surface temperature, one value per month:
+[`annual_means`](@ref) groups the records by calendar year and averages the global mean of each record. A record is any value that has the fields that the function reads. This example has two years of records of a uniform surface temperature, with one value per month:
 
 ```jldoctest
 julia> using GREBExperiments, GREBClimate
@@ -37,24 +35,15 @@ julia> dropped
 Int64[]
 ```
 
-The mean of the months 1 to 12 is 6.5 and of 13 to 24 is 18.5. Every mean is area-weighted: a cell near the pole counts less than a cell on the equator. With a function, a derived quantity can be averaged, for example the net top-of-atmosphere flux `rec -> global_mean(rec.sw) - global_mean(rec.olr)`.
+The mean of the months 1 to 12 is 6.5, and the mean of the months 13 to 24 is 18.5. A function in place of the field name gives the mean of a derived quantity. An example is the top-of-atmosphere net flux `rec -> global_mean(rec.sw) - global_mean(rec.olr)`.
 
 ## The summary of a result
 
-`summarize(result)` applies `annual_means` to the fields most experiments use and returns them for both phases:
-
-| Field | Content |
-|:------|:--------|
-| `ctrl`, `scnr` | Each a named tuple with `years`, `Ts`, `precip`, `ice` and `net` (`sw - olr`) |
-| `drift` | Change of the control's annual `Ts` from its first to its last year [K]; `NaN` for one year. A control in equilibrium has none |
-| `scnr_anomaly` | Whether the scenario records are anomalies from the control rather than absolute values |
-| `out_of_range` | `(ctrl, scnr)`, each `nothing` or the first record outside the allowed range |
-
-The result is a few kilobytes. Keep it, drop the result, and the memory is free for the next member of a sweep. The [Climate sensitivity](@ref) page shows what to do with `Ts` and `net`.
+[`summarize`](@ref) applies `annual_means` to the fields that most experiments use, for the control and for the scenario. The result is a few kilobytes. Keep the summary and discard the result, so the memory is free for the next member of a sweep. The [Climate sensitivity](@ref) page shows how to use `Ts` and `net`.
 
 ## Checking that a run stayed in range
 
-A model run that diverges does not fail; it produces large or non-finite numbers. `in_range_report(records, times, anomaly)` returns `nothing` when every value is finite and inside the allowed range, and otherwise the year, month, field and value of the first record that is not. The range is the one of `GREBClimate.RangeCheck()` for `Ts`, `Ta`, `To` and `q`. For anomalies the size of a value must not exceed a limit per field: 80 K for `Ts` and `Ta`, 40 K for `To`, 0.08 kg/kg for `q`. These limits are far above a strong forced change and far below a diverged run. Give other limits with the keyword `anomaly_limits`.
+A model run that diverges does not stop with an error. It gives large or non-finite numbers. [`in_range_report`](@ref) finds the first record that is out of range:
 
 ```jldoctest
 julia> using GREBExperiments, GREBClimate
@@ -71,4 +60,4 @@ julia> in_range_report([record(288f0), record(1f24)], times, false)
 (year = 1950, month = 2, field = :Ts, value = 1.0f24)
 ```
 
-`summarize` tests the control and the scenario separately, because a scenario can leave the range while its control is fine. The records are monthly means, so a short excursion inside a month is not seen: for a member that can diverge, also pass `GREBClimate.RangeCheck()` as the `observer` of `greb_model!`. A sweep should drop or flag every member whose `out_of_range` is not `(nothing, nothing)` before it averages anything.
+Before a sweep averages its members, it must remove or flag each member whose `out_of_range` is not `(nothing, nothing)`.

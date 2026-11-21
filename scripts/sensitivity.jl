@@ -2,17 +2,14 @@
 #
 #   julia --project=. -t 2,0 scripts/sensitivity.jl [preset] [scenario years] [spin-up years] [control years]
 #
-# Runs `preset` (default co2_double) for the scenario years (default 100) on the
-# NCEP climatology, after a spin-up (default 3 years) and a control (default 2; the control repeats, so more years add nothing),
-# and regresses the top-of-atmosphere net-flux change (`sw - olr`) on the
-# surface-temperature change over the annual global means (Gregory). Prints
-# forcing, feedback, effective sensitivity, r2, the warming reached and the net
-# flux left at the end.
+# Defaults: co2_double, 100 scenario years, 3 spin-up years, 2 control years.
+# The control repeats one year, so more control years add nothing. The script
+# runs the preset on the NCEP climatology and gives the annual global means to
+# `gregory`. It prints the forcing, feedback, effective sensitivity, r2, the
+# warming reached and the net flux that remains.
 #
-# The sensitivity can sit below the warming reached, since `sw - olr` is not the
-# whole budget of the scenario anomaly. For `co2_double`, 100 years: 5.06 W/m2,
-# -1.88 W/m2/K, 2.69 K, reached 3.00 K. Needs the local dataset and a preset
-# whose scenario output is an anomaly.
+# For co2_double and 100 years: 5.06 W/m2, -1.88 W/m2/K, 2.69 K, 3.00 K reached.
+# The script needs the local dataset and a preset whose scenario is an anomaly.
 
 using GREBClimate
 using Printf
