@@ -74,5 +74,6 @@ The levels run side by side, which is why it wants several threads. Each running
 | `land_ocean(map, z_topo)` | The area-weighted means over land and over ocean |
 | `pattern_correlation(a, b)` | The area-weighted correlation of two maps |
 | `sine_fit(series, period)` | The amplitude, the lag in samples and the mean of a fitted sine |
+| `co2_file(path, years, values)` | Writes a `year ppm` file for `CO2File(path)`; returns the path |
 
 `test/test_helpers.jl` tests the helpers; run `julia --project=. -e 'using Pkg; Pkg.test()'` after changing them.
