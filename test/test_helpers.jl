@@ -77,7 +77,7 @@ end
     # A run that diverged by 100 K is caught, not hidden inside the absolute range width
     @test ET.in_range_report([uniform_record(100.0f0; q=0.001f0)], times[1:1], true).field == :Ts
     @test ET.in_range_report([uniform_record(100.0f0; q=0.001f0)], times[1:1], true;
-        anomaly_limits=(Ts=200.0, Ta=200.0, To=200.0, q=0.04)) === nothing
+        anomaly_limits=(Ts=200.0, Ta=200.0, To=200.0, q=0.08)) === nothing
 end
 
 @testset "summarize reduces a model result" begin

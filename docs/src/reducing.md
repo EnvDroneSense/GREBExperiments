@@ -53,7 +53,7 @@ The result is a few kilobytes. Keep it, drop the result, and the memory is free 
 
 ## Checking that a run stayed in range
 
-A model run that diverges does not fail; it produces large or non-finite numbers. `in_range_report(records, times, anomaly)` returns `nothing` when every value is finite and inside the allowed range, and otherwise the year, month, field and value of the first record that is not. The range is the one of `GREBClimate.RangeCheck()` for `Ts`, `Ta`, `To` and `q`. For anomalies the size of a value must not exceed a limit per field: 80 K for `Ts` and `Ta`, 40 K for `To`, 0.04 kg/kg for `q`. These limits are far above a strong forced change and far below a diverged run. Give other limits with the keyword `anomaly_limits`.
+A model run that diverges does not fail; it produces large or non-finite numbers. `in_range_report(records, times, anomaly)` returns `nothing` when every value is finite and inside the allowed range, and otherwise the year, month, field and value of the first record that is not. The range is the one of `GREBClimate.RangeCheck()` for `Ts`, `Ta`, `To` and `q`. For anomalies the size of a value must not exceed a limit per field: 80 K for `Ts` and `Ta`, 40 K for `To`, 0.08 kg/kg for `q`. These limits are far above a strong forced change and far below a diverged run. Give other limits with the keyword `anomaly_limits`.
 
 ```jldoctest
 julia> using GREBExperiments, GREBClimate

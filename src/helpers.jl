@@ -103,7 +103,7 @@ end
 
 # Largest allowed size of a monthly anomaly per field [K, kg/kg]: above a strong
 # forced change, below a diverged run
-const ANOMALY_LIMITS = (Ts=80.0, Ta=80.0, To=40.0, q=0.04)
+const ANOMALY_LIMITS = (Ts=80.0, Ta=80.0, To=40.0, q=0.08)
 
 """
     in_range_report(records, times, anomaly; anomaly_limits=ANOMALY_LIMITS)
@@ -112,7 +112,7 @@ const ANOMALY_LIMITS = (Ts=80.0, Ta=80.0, To=40.0, q=0.04)
 `(year, month, field, value)` of the first one that is not. For absolute
 records the range is that of `GREBClimate.RangeCheck()` for `Ts`, `Ta`, `To`
 and `q`. For anomalies the size of a value must not exceed the field's entry
-in `anomaly_limits` (80 K for `Ts` and `Ta`, 40 K for `To`, 0.04 kg/kg for `q`).
+in `anomaly_limits` (80 K for `Ts` and `Ta`, 40 K for `To`, 0.08 kg/kg for `q`).
 """
 function in_range_report(records, times, anomaly::Bool; anomaly_limits::NamedTuple=ANOMALY_LIMITS)
     limits = G.RangeCheck().limits

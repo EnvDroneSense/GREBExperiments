@@ -3,7 +3,7 @@
 
 Helpers for experiments that run GREBClimate.jl and reduce its results: annual
 and area-weighted means, the Gregory sensitivity estimate, map diagnostics.
-Scripts that use them are in `experiments/`.
+Scripts that use them are in `scripts/`.
 """
 module GREBExperiments
 
