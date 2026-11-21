@@ -23,7 +23,9 @@ The project uses [Semantic Versioning](https://semver.org/). No version is tagge
 - `in_range_report`: keyword `anomaly_limits`, a limit per field.
 - `polar_amplification`: also returns the two polar means and the global mean.
 - Dependencies: the standard libraries `Dates` and `TOML`.
-- `CHANGELOG.md`.
+- `CHANGELOG.md`, also shown as a docs page.
+- Docs: a Guide for students (Getting started, Experiments, Climate sensitivity,
+  Climate patterns) apart from the Reference for developers.
 
 ### Changed
 
@@ -50,6 +52,8 @@ The project uses [Semantic Versioning](https://semver.org/). No version is tagge
 - `area_mean` (mask) and `zonal_mean` throw `DimensionMismatch` for a wrong
   size. `pattern_correlation` throws `ArgumentError` for a constant map.
 - `sine_fit` throws for a series shorter than one period.
+- Notebook: the last-year `Ts` change of an anomaly scenario no longer
+  subtracts the absolute control temperature.
 - Stale docs text: the scripts are in `scripts/`, and the tests no longer use
   `split_winds!`.
 

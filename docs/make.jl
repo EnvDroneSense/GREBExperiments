@@ -12,6 +12,9 @@
 using Documenter
 using GREBExperiments
 
+# The changelog page is a copy of CHANGELOG.md, so the file stays the one source.
+cp(joinpath(@__DIR__, "..", "CHANGELOG.md"), joinpath(@__DIR__, "src", "reference", "changelog.md"); force=true)
+
 # makedocs runs the `jldoctest` blocks and fails the build on a mismatch.
 DocMeta.setdocmeta!(GREBExperiments, :DocTestSetup, :(using GREBExperiments); recursive=true)
 
@@ -25,15 +28,22 @@ makedocs(
     checkdocs=:exports,
     pages=[
         "Home" => "index.md",
-        "Running the scripts" => "scripts.md",
-        "Helpers" => [
-            "Reducing a run" => "reducing.md",
-            "Climate sensitivity" => "sensitivity.md",
-            "Map diagnostics" => "maps.md",
-            "Fitting a cycle" => "series.md",
-            "Plots and the notebook" => "plots.md"
+        "Guide" => [
+            "Getting started" => "guide/start.md",
+            "Experiments" => "guide/experiments.md",
+            "Climate sensitivity" => "guide/sensitivity.md",
+            "Climate patterns" => "guide/patterns.md"
         ],
-        "API Reference" => "api.md"
+        "Reference" => [
+            "Running the scripts" => "reference/scripts.md",
+            "Reducing a run" => "reference/reducing.md",
+            "Sensitivity estimate" => "reference/sensitivity.md",
+            "Map diagnostics" => "reference/maps.md",
+            "Fitting a cycle" => "reference/series.md",
+            "Experiment plots" => "reference/plots.md",
+            "API Reference" => "reference/api.md",
+            "Changelog" => "reference/changelog.md"
+        ]
     ]
 )
 

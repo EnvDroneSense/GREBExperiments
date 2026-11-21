@@ -1,16 +1,10 @@
-# Climate sensitivity
+# Sensitivity estimate
 
-[`gregory`](@ref) estimates how strongly the model responds to a forcing. It uses one abrupt-forcing run and does not wait for equilibrium.
+[`gregory`](@ref) estimates how strongly the model responds to a forcing. It uses one abrupt-forcing run and does not wait for equilibrium. The Guide page [Climate sensitivity](@ref) explains the method.
 
-## The method
+## The fit
 
-After a sudden increase of CO2, the top-of-atmosphere net flux ``N`` starts at the forcing ``F``. It then decreases toward zero while the surface warms by ``\Delta T``. To first order, the relation is linear:
-
-```math
-N = F + \lambda \, \Delta T
-```
-
-`gregory(dTs, dnet)` fits this line to the annual global means. The forcing ``F`` is the fit at zero warming, the feedback ``\lambda`` is the slope, and the sensitivity ``-F / \lambda`` is the warming at which the fit reaches zero net flux. The docstring of [`gregory`](@ref) lists all fields of the result.
+`gregory(dTs, dnet)` fits the line ``N = F + \lambda \, \Delta T`` to the annual global means. The forcing ``F`` is the fit at zero warming, the feedback ``\lambda`` is the slope, and the sensitivity ``-F / \lambda`` is the warming at which the fit reaches zero net flux. The docstring of [`gregory`](@ref) lists all fields of the result.
 
 ```jldoctest
 julia> using GREBExperiments
@@ -42,7 +36,7 @@ g = gregory(s.scnr.Ts, s.scnr.net)
 
 `scripts/sensitivity.jl` does this and prints the result. See [Running the scripts](@ref).
 
-## What the number means
+## Limits of the estimate
 
 - The sensitivity is an effective sensitivity. It comes from the first decades of a run, not from equilibrium. The deep ocean has not warmed yet, so a longer run can give a different value.
 - It can differ from `reached`, because `sw - olr` is not the full energy budget of the anomaly. The docstring of [`gregory`](@ref) gives the two other flows. `closure` shows the ratio, and `remaining` shows how much of the imbalance stays at the end.

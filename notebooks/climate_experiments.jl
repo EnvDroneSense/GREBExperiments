@@ -66,7 +66,8 @@ summary = result === nothing ? nothing : summarize(result);
 
 # ╔═╡ 497b0158-6522-4dd8-83f2-eb4a4320e8a5
 summary === nothing ? md"Tick *Run the model* above." :
-    (out_of_range = summary.out_of_range, last_year_Ts_change = summary.scnr.Ts[end] - summary.ctrl.Ts[end])
+    (out_of_range = summary.out_of_range,
+        last_year_Ts_change = summary.scnr_anomaly ? summary.scnr.Ts[end] : summary.scnr.Ts[end] - summary.ctrl.Ts[end])
 
 # ╔═╡ e844bb50-4e64-4a9e-8a7f-9617cacfcd2f
 md"""## How sensitive is the climate?

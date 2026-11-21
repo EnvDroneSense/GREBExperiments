@@ -13,7 +13,7 @@ The scripts in `scripts/` run the model to answer a question. They read the loca
 julia --project=. -t 2,0 scripts/sensitivity.jl [preset] [scenario years] [spin-up years] [control years]
 ```
 
-The defaults are `co2_double`, 100 scenario years, a spin-up of 3 years and a control of 2 years, on the NCEP climatology. The control repeats the same year, so more control years add nothing. The script gives the annual global means of the scenario to [`gregory`](@ref) (see [Climate sensitivity](@ref)). The preset must give its scenario as an anomaly. A short run:
+The defaults are `co2_double`, 100 scenario years, a spin-up of 3 years and a control of 2 years, on the NCEP climatology. The control repeats the same year, so more control years add nothing. The script gives the annual global means of the scenario to [`gregory`](@ref) (see [Sensitivity estimate](@ref)). The preset must give its scenario as an anomaly. A short run:
 
 ```text
 co2_double, 20 scenario years, spin-up 2, control 3

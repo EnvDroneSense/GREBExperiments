@@ -39,7 +39,7 @@ The mean of the months 1 to 12 is 6.5, and the mean of the months 13 to 24 is 18
 
 ## The summary of a result
 
-[`summarize`](@ref) applies `annual_means` to the fields that most experiments use, for the control and for the scenario. The result is a few kilobytes. Keep the summary and discard the result, so the memory is free for the next member of a sweep. The [Climate sensitivity](@ref) page shows how to use `Ts` and `net`.
+[`summarize`](@ref) applies `annual_means` to the fields that most experiments use, for the control and for the scenario. The result is a few kilobytes. Keep the summary and discard the result, so the memory is free for the next member of a sweep. The [Sensitivity estimate](@ref) page shows how to use `Ts` and `net`.
 
 ## Checking that a run stayed in range
 

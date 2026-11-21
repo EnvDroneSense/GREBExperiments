@@ -31,7 +31,7 @@ The tests need no dataset. The scripts read a local copy of the GREBClimate inpu
 3. Guard the entry point with `if abspath(PROGRAM_FILE) == @__FILE__`, so the file can be loaded without running it.
 4. Reduce each run to a few numbers before the next one starts (`summarize`), and check `out_of_range` before averaging.
 5. Write results under `scripts/out/`. Do not commit them; put a short run, with its settings, in the documentation page instead.
-6. Add a row to the table and a section in `docs/src/scripts.md`.
+6. Add a row to the table and a section in `docs/src/reference/scripts.md`.
 
 ## Adding or changing a helper
 
@@ -40,7 +40,7 @@ A helper goes in `src/` when two scripts need it or when it can be tested on its
 1. Make it a pure function of its arguments where possible. Only `driver.jl` runs the model and only `io.jl` writes files.
 2. Give it a docstring with a signature, what it returns and the units. The docstring is the source of truth. Export the name in the `export` line of its source file. The docs build fails on an exported name without a docstring.
 3. Add a testset to the `test/test_x.jl` of its source file. The testset must fail when the function is wrong. Test with small synthetic input: a test must not need the dataset, because CI has none.
-4. Add it to `docs/src/api.md`. On the helper page it belongs to, explain its use with an example that runs as a doctest, and link to the docstring with `@ref`.
+4. Add it to `docs/src/reference/api.md`. On the Reference page it belongs to, explain its use with an example that runs as a doctest, and link to the docstring with `@ref`.
 
 ## The model dependency
 
@@ -50,6 +50,8 @@ GREBClimate is pinned to one minor version (`~2.3` in `Project.toml` and `docs/P
 - To move to a new model release, change both pins, run the tests and the docs build, and fix what breaks in the same pull request.
 
 ## Checks before a pull request
+
+Add a line for each change that a user sees to `CHANGELOG.md`, under `Unreleased`. The docs build copies the file to the Changelog page.
 
 ```bash
 julia --project=. -e 'using Pkg; Pkg.test()'

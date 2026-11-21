@@ -1,4 +1,4 @@
-# Plots and the notebook
+# Experiment plots
 
 GREBExperiments has two plots for experiment results. For plots of a whole run (maps, time series, Hovmoller diagrams, animations), use GREBViz in the GREBClimate repository.
 
@@ -18,11 +18,4 @@ plot_response(rows; xlog = true)
 
 ## The notebook
 
-`notebooks/climate_experiments.jl` is a Pluto notebook for students. You select an experiment and the run length, and the notebook runs the model and checks the result. It then shows the Gregory plot, a map and the time series. The notebook needs the local dataset and a clone of GREBClimate next to this repository.
-
-```bash
-julia notebooks/setup.jl
-julia --project=notebooks -e 'using Pluto; Pluto.run(notebook="notebooks/climate_experiments.jl")'
-```
-
-The notebook uses the GREBViz names with a `GREBViz.` prefix, because `zonal_mean` is in both packages.
+`notebooks/climate_experiments.jl` is the Pluto notebook for students. [Getting started](@ref) tells how to open it. It has its own environment in `notebooks/Project.toml`, so the package needs neither Pluto nor Plots. It includes GREBViz from `../GREB-julia/viz` and uses the GREBViz names with a `GREBViz.` prefix, because `zonal_mean` is in both packages.
