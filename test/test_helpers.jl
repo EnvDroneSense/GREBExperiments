@@ -40,6 +40,14 @@ end
     @test ET.pattern_correlation(a, 3 .* a .+ 2) ≈ 1
     @test ET.pattern_correlation(a, -a) ≈ -1
     @test_throws DimensionMismatch ET.area_mean(zeros(Float32, 3, 3))
+    @test_throws DimensionMismatch ET.area_mean(a, trues(3, 3))
+    @test_throws DimensionMismatch ET.zonal_mean(zeros(Float32, 3, 3))
+    @test_throws ArgumentError ET.pattern_correlation(ones_map, a)
+    # Two weight implementations agree on a map that is not constant
+    @test ET.area_mean(a) ≈ global_mean(a)
+    # Zero global mean: the ratio is meaningless, the means are still given
+    zero_mean = a .- Float32(ET.area_mean(a))
+    @test abs(ET.polar_amplification(zero_mean).global_mean) < 1e-5
 end
 
 @testset "sine_fit finds amplitude, lag and mean" begin
@@ -47,6 +55,10 @@ end
     series = [2 + 3 * sin(2π * (t - lag) / period) for t in 0:159]
     fit = ET.sine_fit(series, period)
     @test fit.amplitude ≈ 3 && fit.lag ≈ lag && fit.mean ≈ 2
+    # A true lag of 0.6 period comes back wrapped to -0.4 period
+    wrapped = ET.sine_fit([sin(2π * (t - 0.6 * period) / period) for t in 0:159], period)
+    @test wrapped.lag ≈ -0.4 * period
+    @test_throws ArgumentError ET.sine_fit(ones(10), period)
 end
 
 @testset "annual means group by record time" begin
@@ -57,6 +69,9 @@ end
     @test values ≈ [gmean(1:12), gmean(13:24)]
     @test ET.annual_means(records, times, rec -> 2 * rec.Ts[1, 1])[2] ≈ 2 .* values
     @test_throws DimensionMismatch ET.annual_means(records, times[1:5], :Ts)
+    weights = Float64.([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+    @test ET.annual_means(records, times, :Ts; month_weights=weights).values[1] ≈ sum(weights .* (1:12)) / sum(weights)
+    @test_throws ArgumentError ET.annual_means(records, times, :Ts; month_weights=ones(11))
     # Two joined runs that repeat a year are refused
     @test_throws ArgumentError ET.annual_means([records; records[1:12]], [times; times[1:12]], :Ts)
 end
@@ -89,6 +104,7 @@ end
     @test s.scnr.net[2] ≈ gmean([global_mean(r.sw) - global_mean(r.olr) for r in result.scnr[13:24]])
     # The synthetic fields are not a climate: the scenario drifts about 100 K from
     # its control, which the anomaly limit catches
+    @test isnan(s.drift)                             # one control year: no drift to measure
     @test s.out_of_range.ctrl === nothing && s.out_of_range.scnr.field == :Ts
 
     # A scenario can leave the range while its control is fine

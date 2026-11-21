@@ -14,7 +14,7 @@ The scripts in `scripts/` run the model to answer a question. They need the loca
 julia --project=. -t 2,0 scripts/sensitivity.jl [preset] [scenario years] [spin-up years] [control years]
 ```
 
-The defaults are `co2_double`, 100 scenario years, a spin-up of 3 years and a control of 5 years, on the NCEP climatology. The script regresses the change in the top-of-atmosphere net flux (`sw - olr`) on the change in surface temperature over the annual global means (the Gregory method). The preset must give its scenario as an anomaly. A short run:
+The defaults are `co2_double`, 100 scenario years, a spin-up of 3 years and a control of 2 years (the control repeats the same year, so more add nothing), on the NCEP climatology. The script regresses the change in the top-of-atmosphere net flux (`sw - olr`) on the change in surface temperature over the annual global means (the Gregory method). The preset must give its scenario as an anomaly. A short run:
 
 ```text
 co2_double, 20 scenario years, spin-up 2, control 3

@@ -15,7 +15,7 @@ to `series`, with `t` counted in samples from 0 and the period ``P`` in samples.
 | Field | Meaning |
 |:------|:--------|
 | `amplitude` | ``\sqrt{a^2 + b^2}``, in the unit of the series |
-| `lag` | In samples; positive when the series peaks later than a sine that starts at 0 |
+| `lag` | In samples; positive when the series peaks later than a sine that starts at 0. Wrapped to (-period/2, period/2]: a true lag of 0.6 periods comes back as -0.4 periods |
 | `mean` | The constant ``c`` |
 
 ```jldoctest

@@ -10,7 +10,7 @@ A `greb_model!` run returns one record per month for the control and for the sce
 
 ## Annual means
 
-`annual_means(records, times, f)` groups the records by calendar year and averages the global mean of each. A year counts only when all 12 months are present, so a run that ends in June does not return a half-year value that looks like a full one. The third result, `dropped`, lists those incomplete years. A `(year, month)` that occurs twice, as in two joined runs, is an error. `f` is a field name, such as `:Ts`, or a function of one record that returns a number.
+`annual_means(records, times, f)` groups the records by calendar year and averages the global mean of each. A year counts only when all 12 months are present, so a run that ends in June does not return a half-year value that looks like a full one. The third result, `dropped`, lists those incomplete years. The months have equal weight; `month_weights` (12 values) changes that. A `(year, month)` that occurs twice, as in two joined runs, is an error. `f` is a field name, such as `:Ts`, or a function of one record that returns a number.
 
 Records are anything that has the fields asked for. Here two years of records of a uniform surface temperature, one value per month:
 
@@ -46,6 +46,7 @@ The mean of the months 1 to 12 is 6.5 and of 13 to 24 is 18.5. Every mean is are
 | Field | Content |
 |:------|:--------|
 | `ctrl`, `scnr` | Each a named tuple with `years`, `Ts`, `precip`, `ice` and `net` (`sw - olr`) |
+| `drift` | Change of the control's annual `Ts` from its first to its last year [K]; `NaN` for one year. A control in equilibrium has none |
 | `scnr_anomaly` | Whether the scenario records are anomalies from the control rather than absolute values |
 | `out_of_range` | `(ctrl, scnr)`, each `nothing` or the first record outside the allowed range |
 
@@ -70,4 +71,4 @@ julia> in_range_report([record(288f0), record(1f24)], times, false)
 (year = 1950, month = 2, field = :Ts, value = 1.0f24)
 ```
 
-`summarize` tests the control and the scenario separately, because a scenario can leave the range while its control is fine. A sweep should drop or flag every member whose `out_of_range` is not `(nothing, nothing)` before it averages anything.
+`summarize` tests the control and the scenario separately, because a scenario can leave the range while its control is fine. The records are monthly means, so a short excursion inside a month is not seen: for a member that can diverge, also pass `GREBClimate.RangeCheck()` as the `observer` of `greb_model!`. A sweep should drop or flag every member whose `out_of_range` is not `(nothing, nothing)` before it averages anything.

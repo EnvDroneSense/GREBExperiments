@@ -3,7 +3,7 @@
 #   julia --project=. -t 2,0 scripts/sensitivity.jl [preset] [scenario years] [spin-up years] [control years]
 #
 # Runs `preset` (default co2_double) for the scenario years (default 100) on the
-# NCEP climatology, after a spin-up (default 3 years) and a control (default 5),
+# NCEP climatology, after a spin-up (default 3 years) and a control (default 2; the control repeats, so more years add nothing),
 # and regresses the top-of-atmosphere net-flux change (`sw - olr`) on the
 # surface-temperature change over the annual global means (Gregory). Prints
 # forcing, feedback, effective sensitivity, r2, the warming reached and the net
@@ -22,7 +22,7 @@ function main(args)
     name = Symbol(get(args, 1, "co2_double"))
     years = parse(Int, get(args, 2, "100"))
     spinup = parse(Int, get(args, 3, "3"))
-    ctrl = parse(Int, get(args, 4, "5"))
+    ctrl = parse(Int, get(args, 4, "2"))
 
     dir = greb_data_dir(; allow_download=false)
     dir === nothing && error("no local dataset found")

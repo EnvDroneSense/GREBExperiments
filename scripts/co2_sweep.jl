@@ -4,14 +4,15 @@
 #
 # Holds CO2 at each of `levels` values (default 5), log-spaced between 170 ppm
 # (:co2_half) and 3400 ppm (:co2_10x), for the scenario years (default 30) after
-# a spin-up (default 3) and a control at 280 ppm (default 5). Prints, and writes
-# to scripts/out/co2_sweep.csv, the anomaly of the last scenario year:
-# global-mean Ts, ice cover and precipitation. For a full curve use
+# a spin-up (default 3) and a control at 280 ppm (default 5); the output
+# repeats the control CO2. Prints, and writes to scripts/out/co2_sweep.csv, the
+# anomaly of the last scenario year: global-mean Ts, ice cover and
+# precipitation, and whether a monthly record left the allowed range. For a full curve use
 # `... 20 100`, which takes hours. Needs the local dataset and several threads;
 # each running level holds 370 MB of fields.
 
 using GREBClimate
-using GREBExperiments: annual_means
+using GREBExperiments: annual_means, in_range_report
 
 function main(args)
     levels = parse(Int, get(args, 1, "5"))
@@ -23,24 +24,28 @@ function main(args)
     dir = greb_data_dir(; allow_download=false)
     dir === nothing && error("no local dataset found")
     fields = load_climatology(dir; dataset=:ncep)
+    control_co2 = 280
     co2 = levels == 1 ? [170.0] : exp10.(range(log10(170.0), log10(3400.0), length=levels))
-    configs = [Config(scenario=Scenario(co2=ConstantCO2(c), control_co2=280), corrections=SpinUp(spinup))
+    configs = [Config(scenario=Scenario(co2=ConstantCO2(c), control_co2=control_co2), corrections=SpinUp(spinup))
                for c in co2]
 
     # Only the last-year anomalies leave each task
     last_year(result, field) = annual_means(result.scnr, result.scnr_time, field)[2][end]
     anomalies = run_ensemble(RunSpec(ctrl=ctrl, scnr=years), configs; fields, jld2_dir=dir) do result
-        (Ts=last_year(result, :Ts), ice=last_year(result, :ice), precip=last_year(result, :precip))
+        (Ts=last_year(result, :Ts), ice=last_year(result, :ice), precip=last_year(result, :precip),
+            out_of_range=in_range_report(result.scnr, result.scnr_time, result.scnr_anomaly) !== nothing)
     end
 
     mkpath(joinpath(@__DIR__, "out"))
     csv = joinpath(@__DIR__, "out", "co2_sweep.csv")
     open(csv, "w") do io
-        println(io, "co2_ppm,Ts_anom_K,ice_anom_frac,precip_anom")
+        println(io, "co2_ppm,control_co2_ppm,Ts_anom_K,ice_anom_frac,precip_anom,out_of_range")
         for (c, a) in zip(co2, anomalies)
-            println(io, c, ",", a.Ts, ",", a.ice, ",", a.precip)
+            println(io, c, ",", control_co2, ",", a.Ts, ",", a.ice, ",", a.precip, ",", a.out_of_range)
         end
     end
+    any(a -> a.out_of_range, anomalies) && @warn "a member left the allowed range: see the out_of_range column"
+    println("control CO2 = ", control_co2, " ppm")
     println(lpad("CO2 [ppm]", 10), lpad("Ts [K]", 10), lpad("ice", 10), lpad("precip", 10))
     for (c, a) in zip(co2, anomalies)
         println(lpad(round(c, digits=0), 10), lpad(round(a.Ts, digits=2), 10),

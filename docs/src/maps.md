@@ -6,9 +6,9 @@ The model grid is 96 x 48 in longitude and latitude. A cell near the pole covers
 |:---------|:--------|
 | [`area_mean`](@ref) | The area-weighted mean of a map, optionally over a mask |
 | [`zonal_mean`](@ref) | The mean over longitude: one value per latitude row |
-| [`polar_amplification`](@ref) | The mean poleward of a latitude, north and south, divided by the global mean |
+| [`polar_amplification`](@ref) | The mean poleward of a latitude, north and south, divided by the global mean; the three means too |
 | [`land_ocean`](@ref) | The area-weighted means over land and over ocean |
-| [`pattern_correlation`](@ref) | The area-weighted correlation of two maps |
+| [`pattern_correlation`](@ref) | The area-weighted correlation of two maps; a constant map throws an `ArgumentError` |
 
 ## Means
 
@@ -27,17 +27,17 @@ julia> zonal_mean(map)[1:3]
  1.0
 ```
 
-A mask selects the cells. `area_mean(map, mask)` averages over the cells where `mask` is `true` and throws an `ArgumentError` when it selects none. A map of the wrong size throws a `DimensionMismatch`, so a transposed map does not pass silently.
+A mask selects the cells. `area_mean(map, mask)` averages over the cells where `mask` is `true` and throws an `ArgumentError` when it selects none. A map or a mask of the wrong size throws a `DimensionMismatch`, so a transposed map does not pass silently.
 
 ## Polar amplification
 
-`polar_amplification(map; latitude=60)` returns `(north, south)`: the mean of the map poleward of `latitude` degrees divided by its global mean, for each hemisphere. A uniform map gives `(1.0, 1.0)`; a warming that is twice as strong near the poles gives a value above 1. Give it a temperature change, not an absolute temperature, since the cold poles would otherwise give a number below 1 for any map.
+`polar_amplification(map; latitude=60)` returns `(north, south, north_mean, south_mean, global_mean)`: `north` and `south` are the mean of the map poleward of `latitude` degrees divided by its global mean, for each hemisphere, and the other three are the means. A uniform map gives `north = south = 1.0`; a warming that is twice as strong near the poles gives a value above 1. Give it a temperature change, not an absolute temperature, since the cold poles would otherwise give a number below 1 for any map. When the global mean is near zero (a regional or residual map) the ratio is very large or changes sign; use the means then.
 
 ```jldoctest
 julia> using GREBExperiments, GREBClimate
 
 julia> polar_amplification(fill(1.0f0, xdim, ydim))
-(north = 1.0, south = 1.0)
+(north = 1.0, south = 1.0, north_mean = 1.0, south_mean = 1.0, global_mean = 1.0)
 ```
 
 ## Land and ocean
